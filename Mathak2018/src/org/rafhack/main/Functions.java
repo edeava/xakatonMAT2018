@@ -56,7 +56,7 @@ public class Functions {
         for(int i = 0; i < mat.length; i++) {
             for(int j = 0; j < mat[i].length; j++) {
                 if(mat[i][j] == 'X') {
-                    nodes.add(new Node(i, j, 0));
+                    nodes.add(new Node(i, j, 0, null));
                 }
             }
         }
@@ -149,7 +149,17 @@ public class Functions {
         throw new IllegalArgumentException("Najblizi cvor ne postoji");
     }
 
-    private static char[][] cloneMatrix(char[][] in) {
+    public static void drawPath(char[][] mat, Node destination, Node source) {
+        if(source.parent == null || source.parent.row == destination.row && source.parent.column == destination.column) {
+            return;
+        }
+
+        mat[source.parent.row][source.parent.column] = '.';
+
+        drawPath(mat, destination, source.parent);
+    }
+
+    public static char[][] cloneMatrix(char[][] in) {
         int r = in.length;
         int c = in[0].length;
 
@@ -167,28 +177,28 @@ public class Functions {
     private static List<Node> getNeighbors(char[][] maze, Node current) {
         List<Node> neighbors = new ArrayList<>();
 
-        // Levo
-        if(current.row > 0
-                && (maze[current.row - 1][current.column] != '+' || maze[current.row - 1][current.column] != '|')) {
-            neighbors.add(new Node(current.row - 1, current.column, current.distance + 1));
-        }
-
-        // Gore
-        if(current.column > 0
-                && (maze[current.row][current.column - 1] != '+' || maze[current.row][current.column - 1] != '-')) {
-            neighbors.add(new Node(current.row, current.column - 1, current.distance + 1));
+        // Dole
+        if(current.column < maze[0].length - 1
+                && (maze[current.row][current.column + 1] != '+' && maze[current.row][current.column + 1] != '|')) {
+            neighbors.add(new Node(current.row, current.column + 1, current.distance + 1, current));
         }
 
         // Desno
         if(current.row < maze.length - 1
-                && (maze[current.row + 1][current.column] != '+' || maze[current.row + 1][current.column] != '|')) {
-            neighbors.add(new Node(current.row + 1, current.column, current.distance + 1));
+                && (maze[current.row + 1][current.column] != '+' && maze[current.row + 1][current.column] != '-')) {
+            neighbors.add(new Node(current.row + 1, current.column, current.distance + 1, current));
         }
 
-        // Dole
-        if(current.column < maze[0].length - 1
-                && (maze[current.row][current.column + 1] != '+' || maze[current.row][current.column + 1] != '-')) {
-            neighbors.add(new Node(current.row, current.column + 1, current.distance + 1));
+        // Gore
+        if(current.column > 0
+                && (maze[current.row][current.column - 1] != '+' && maze[current.row][current.column - 1] != '|')) {
+            neighbors.add(new Node(current.row, current.column - 1, current.distance + 1, current));
+        }
+
+        // Levo
+        if(current.row > 0
+                && (maze[current.row - 1][current.column] != '+' && maze[current.row - 1][current.column] != '-')) {
+            neighbors.add(new Node(current.row - 1, current.column, current.distance + 1, current));
         }
 
         return neighbors;
@@ -197,11 +207,13 @@ public class Functions {
     public static class Node {
 
         private int row, column, distance;
+        private Node parent;
 
-        Node(int row, int column, int distance) {
+        Node(int row, int column, int distance, Node parent) {
             this.row = row;
             this.column = column;
             this.distance = distance;
+            this.parent = parent;
         }
 
         public int getDistance() {
@@ -211,6 +223,17 @@ public class Functions {
         @Override
         public String toString() {
             return "(" + row + ", " + column + ")";
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(obj instanceof Node) {
+                Node node = (Node) obj;
+
+                return node.row == this.row && node.column == this.column;
+            }
+
+            return false;
         }
     }
 }
