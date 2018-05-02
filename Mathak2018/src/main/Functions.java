@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class Functions {
+<<<<<<< HEAD
 
     public static char[][] ucitaj(String path) {
         Scanner s;
@@ -44,11 +45,11 @@ public class Functions {
         return mat;
     }
 
-	public static void ispisiResenje(char mat[][], int n, int m, int rez) {
+	public static void ispisiResenje(char mat[][], int rez) {
 		System.out.println(rez);
 		
-		for(int i=0;i<n;i++) {
-			for(int j=0;j<m;j++) {
+		for(int i=0;i<mat.length;i++) {
+			for(int j=0;j<mat[i].length;j++) {
 				System.out.print(mat[i][j]);
 			}
 			System.out.println("");
