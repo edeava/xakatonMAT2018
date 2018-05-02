@@ -7,7 +7,10 @@ public class Main {
 
     public static void main(String[] args) {
         // TODO ucitati ime fajla preko konzole
-        char[][] mat = Functions.read("test.in");
+        solutionOne(Functions.read("test.in"));
+    }
+
+    private static void solutionOne(char[][] mat) {
         char[][] out = Functions.cloneMatrix(mat);
 
         int sum = 0;
@@ -32,5 +35,9 @@ public class Main {
         }
 
         Functions.write(out, sum);
+    }
+
+    private static void solutionTwo(char[][] mat) {
+
     }
 }
