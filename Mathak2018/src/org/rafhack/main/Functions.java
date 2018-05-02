@@ -1,20 +1,14 @@
-package main;
-
-import com.sun.javaws.exceptions.InvalidArgumentException;
-import com.sun.tools.corba.se.idl.InvalidArgument;
+package org.rafhack.main;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Scanner;
+import java.util.*;
 
 public class Functions {
 
     public static final int INF = Integer.MAX_VALUE;
 
-    public static char[][] ucitaj(String path) {
+    public static char[][] read(String path) {
         Scanner s;
 
         try {
@@ -44,8 +38,8 @@ public class Functions {
         return mat;
     }
 
-	public static void ispisi(char[][] mat, int rez) {
-		System.out.println(rez);
+	public static void write(char[][] mat, int res) {
+		System.out.println(res);
 
 		for(int i = 0; i < mat.length; i++) {
 			for(int j = 0; j < mat[i].length; j++) {
@@ -55,6 +49,20 @@ public class Functions {
 			System.out.println();
 		}
 	}
+
+    public static List<Node> getNodes(char[][] mat) {
+        List<Node> nodes = new ArrayList<>();
+
+        for(int i = 0; i < mat.length; i++) {
+            for(int j = 0; j < mat[i].length; j++) {
+                if(mat[i][j] == 'X') {
+                    nodes.add(new Node(i, j, 0));
+                }
+            }
+        }
+
+        return nodes;
+    }
 
 	/**
      * Format ulaznog/izlaznog grafa
@@ -74,17 +82,16 @@ public class Functions {
     public static int[][] floydWarshall(int graph[][])  {
         int len = graph.length;
         int dist[][] = new int[len][len];
-        int i, j, k;
 
-        for(i = 0; i < len; i++) {
-            for(j = 0; j < len; j++) {
+        for(int i = 0; i < len; i++) {
+            for(int j = 0; j < len; j++) {
                 dist[i][j] = graph[i][j];
             }
         }
 
-        for(k = 0; k < len; k++) {
-            for(i = 0; i < len; i++) {
-                for(j = 0; j < len; j++) {
+        for(int k = 0; k < len; k++) {
+            for(int i = 0; i < len; i++) {
+                for(int j = 0; j < len; j++) {
                     if(dist[i][k] + dist[k][j] < dist[i][j]) {
                         dist[i][j] = dist[i][k] + dist[k][j];
                     }
@@ -114,66 +121,84 @@ public class Functions {
      * |    - vertikalna barijera (put ne sme da prodje horizontalno)
      * +    - barijera (put ne sme da prodje ni u kom pravcu)
      */
-    public static Position breadthFirst(char[][] maze, Position source) throws IllegalArgumentException {
-        Queue<Position> queue = new LinkedList<>();
+    public static Node breadthFirst(char[][] original, Node source) throws IllegalArgumentException {
+        Queue<Node> queue = new LinkedList<>();
         queue.offer(source);
 
-        maze[source.row][source.column] = '+';
+        char[][] mat = cloneMatrix(original);
+
+        mat[source.row][source.column] = '+';
 
         while(queue.peek() != null) {
-            Position current = queue.poll();
+            Node current = queue.poll();
 
-            ArrayList<Position> neighbors = getNeighbors(maze, current);
+            List<Node> neighbors = getNeighbors(mat, current);
 
-            for(Position neighbor : neighbors) {
-                if(maze[neighbor.row][neighbor.column] == 'X') {
+            for(Node neighbor : neighbors) {
+                if(mat[neighbor.row][neighbor.column] == 'X') {
+                    original[neighbor.row][neighbor.column] = '+';
                     return neighbor;
                 }
 
                 queue.offer(neighbor);
 
-                maze[neighbor.row][neighbor.column] = '+';
+                mat[neighbor.row][neighbor.column] = '+';
             }
         }
 
         throw new IllegalArgumentException("Najblizi cvor ne postoji");
     }
 
-    private static ArrayList<Position> getNeighbors(char[][] maze, Position current) {
-        ArrayList<Position> neighbors = new ArrayList<>();
+    private static char[][] cloneMatrix(char[][] in) {
+        int r = in.length;
+        int c = in[0].length;
+
+        char[][] out = new char[in.length][in[0].length];
+
+        for(int i = 0; i < r; i++) {
+            for(int j = 0; j < c; j++) {
+                out[i][j] = in[i][j];
+            }
+        }
+
+        return out;
+    }
+
+    private static List<Node> getNeighbors(char[][] maze, Node current) {
+        List<Node> neighbors = new ArrayList<>();
 
         // Levo
         if(current.row > 0
                 && (maze[current.row - 1][current.column] != '+' || maze[current.row - 1][current.column] != '|')) {
-            neighbors.add(new Position(current.row - 1, current.column, current.distance + 1));
+            neighbors.add(new Node(current.row - 1, current.column, current.distance + 1));
         }
 
         // Gore
         if(current.column > 0
                 && (maze[current.row][current.column - 1] != '+' || maze[current.row][current.column - 1] != '-')) {
-            neighbors.add(new Position(current.row, current.column - 1, current.distance + 1));
+            neighbors.add(new Node(current.row, current.column - 1, current.distance + 1));
         }
 
         // Desno
         if(current.row < maze.length - 1
                 && (maze[current.row + 1][current.column] != '+' || maze[current.row + 1][current.column] != '|')) {
-            neighbors.add(new Position(current.row + 1, current.column, current.distance + 1));
+            neighbors.add(new Node(current.row + 1, current.column, current.distance + 1));
         }
 
         // Dole
         if(current.column < maze[0].length - 1
                 && (maze[current.row][current.column + 1] != '+' || maze[current.row][current.column + 1] != '-')) {
-            neighbors.add(new Position(current.row, current.column + 1, current.distance + 1));
+            neighbors.add(new Node(current.row, current.column + 1, current.distance + 1));
         }
 
         return neighbors;
     }
 
-    public static class Position {
+    public static class Node {
 
         private int row, column, distance;
 
-        public Position(int row, int column, int distance) {
+        Node(int row, int column, int distance) {
             this.row = row;
             this.column = column;
             this.distance = distance;
