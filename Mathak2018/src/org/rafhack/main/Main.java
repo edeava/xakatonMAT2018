@@ -22,6 +22,8 @@ public class Main {
                 continue;
             }
 
+            System.out.println("Za " + node + " je najblizi " + closest);
+
             Functions.drawPath(out, node, closest);
 
             sum += closest.getDistance();
