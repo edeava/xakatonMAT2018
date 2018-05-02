@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class Functions {
-<<<<<<< HEAD
 
     public static char[][] ucitaj(String path) {
         Scanner s;
